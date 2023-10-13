@@ -1,0 +1,9 @@
+venv
+.vscode
+*.env
+.mypy_cache
+.*cache
+.hypothesis
+*.txt
+cache/*
+.excalidraw
