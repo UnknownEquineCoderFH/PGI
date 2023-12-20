@@ -5,7 +5,7 @@ from attrs import define
 from typing import Iterator
 
 from .non_terminal import NonTerminal
-from .alt import Alt
+from .expansion import Expansion
 
 
 @define
@@ -14,12 +14,12 @@ class Expression:
     A non-terminal symbol in a grammar.
     """
 
-    expansions: list[Alt]
+    expansions: list[Expansion]
 
     def __repr__(self) -> str:
         return " | ".join(repr(e) for e in self.expansions)
 
-    def __iter__(self) -> Iterator[Alt]:
+    def __iter__(self) -> Iterator[Expansion]:
         return iter(self.expansions)
 
     def can_expand(self) -> bool:

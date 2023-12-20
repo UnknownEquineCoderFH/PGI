@@ -9,7 +9,7 @@ from .utils import chain, monomorphize, break_sequence, is_symbol
 from .non_terminal import NonTerminal
 from .terminal import Terminal
 from .expression import Expression
-from .alt import Alt
+from .expansion import Expansion
 from .predicate import Predicate
 
 
@@ -86,20 +86,24 @@ class Grammar:
 
     def expand_one(
         self, symbol: NonTerminal = NonTerminal("<start>"), /
-    ) -> tuple[Alt, ...]:
+    ) -> tuple[Expansion, ...]:
         partial = (rule.expand_one(self) for rule in self.rules[symbol].expansions)
 
         return tuple(item for sublist in partial for item in sublist)
 
-    def expand_one_from_alts(self, alts: Sequence[Alt], /) -> tuple[Alt, ...]:
+    def expand_one_from_alts(
+        self, alts: Sequence[Expansion], /
+    ) -> tuple[Expansion, ...]:
         partial = (alt.expand_one(self) for alt in alts)
 
         return tuple(item for sublist in partial for item in sublist)
 
-    def _rules_can_expand(self, alts: Sequence[Alt], /) -> bool:
+    def _rules_can_expand(self, alts: Sequence[Expansion], /) -> bool:
         return all(rule.can_expand() for rule in alts)
 
-    def expand(self, symbol: NonTerminal = NonTerminal("<start>"), /) -> Iterator[Alt]:
+    def expand(
+        self, symbol: NonTerminal = NonTerminal("<start>"), /
+    ) -> Iterator[Expansion]:
         alts = self.expand_one(symbol)
 
         while self._rules_can_expand(alts):
@@ -132,7 +136,12 @@ class Grammar:
         for symbol, _ in occurrences:
             yield symbol
 
-    def partial_expand(self, symbol=NonTerminal("<start>"), /) -> Self:
+    def partial_expand(
+        self, symbol: NonTerminal | str = NonTerminal("<start>"), /
+    ) -> Self:
+        if isinstance(symbol, str):
+            symbol = NonTerminal.symbol(symbol)
+
         for rule in self.next_rule():
             self.apply_expansion(rule)
 
@@ -146,7 +155,7 @@ class Grammar:
         rules = dict[NonTerminal, Expression]()
 
         for tag, val in isla_grammar.items():
-            alts = list[Alt]()
+            alts = list[Expansion]()
 
             for alt in val:
                 components = break_sequence(alt)
@@ -155,7 +164,7 @@ class Grammar:
                     NonTerminal(c) if is_symbol(c) else Terminal(c) for c in components
                 ]
 
-                alts.append(Alt(transformed))
+                alts.append(Expansion(transformed))
 
             rules[NonTerminal(tag)] = Expression(alts)
 

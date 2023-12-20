@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @define
-class Alt:
+class Expansion:
     """
     An alternative expansion of a non-terminal.
 
@@ -61,7 +61,7 @@ class Alt:
         return len(self.collapsed)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Alt):
+        if not isinstance(other, Expansion):
             return self.collapsed == other
 
         return self.collapsed == other.collapsed
@@ -139,14 +139,14 @@ class Alt:
 
         return False
 
-    def expand_one(self, grammar: Grammar) -> list[Alt]:
+    def expand_one(self, grammar: Grammar) -> list[Expansion]:
         """
         Expands a single ALt into a list of Alts
 
         **1** step only!
         """
 
-        elements: list[list[Alt] | list[Terminal]] = [
+        elements: list[list[Expansion] | list[Terminal]] = [
             list() for _ in range(len(self.elements))
         ]
 
@@ -159,28 +159,28 @@ class Alt:
         # Product is typed wrong when you pass *args into it,
         # maybe in the future they will use TypeVarTuples
         # Until then, we have to do this
-        partial: product[list[Alt] | list[Terminal]] = product(*elements)  # type: ignore
+        partial: product[list[Expansion] | list[Terminal]] = product(*elements)  # type: ignore
 
-        return Alt._expand_into_alts(partial)
+        return Expansion._expand_into_alts(partial)
 
     @staticmethod
     def _expand_into_alts(
-        partial: Iterator[list[Alt] | list[Terminal]], /
-    ) -> list[Alt]:
+        partial: Iterator[list[Expansion] | list[Terminal]], /
+    ) -> list[Expansion]:
         """
         Expands any iterator over a list of alts an terminals into a list of alts,
         effectively flattening it.
         """
-        tmp_alts = list[Alt]()
+        tmp_alts = list[Expansion]()
 
         for alts in partial:
             tmp = list[Terminal | NonTerminal]()
 
             for alt in alts:
-                if isinstance(alt, Alt):
+                if isinstance(alt, Expansion):
                     tmp.extend(alt.elements)
                 else:
                     tmp.append(alt)
-            tmp_alts.append(Alt(tmp))
+            tmp_alts.append(Expansion(tmp))
 
         return tmp_alts

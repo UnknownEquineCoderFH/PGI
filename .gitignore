@@ -7,3 +7,4 @@ venv
 *.txt
 cache/*
 .excalidraw
+__pycache__

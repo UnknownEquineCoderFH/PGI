@@ -6,7 +6,7 @@ from isla.language import Grammar as ISLaGrammar, parse_bnf
 
 if TYPE_CHECKING:
     from .predicate import Predicate
-    from .alt import Alt
+    from .alt import Expansion
 
 
 def load_bnf(path: str) -> ISLaGrammar:
@@ -53,7 +53,7 @@ def chain(first: Predicate[()], *predicates: Predicate[()]) -> Predicate[()]:
         predicates return True, and False otherwise.
     """
 
-    def inner(symbol: Alt) -> bool:
+    def inner(symbol: Expansion) -> bool:
         if not first(symbol):
             return False
 
@@ -67,7 +67,7 @@ def chain(first: Predicate[()], *predicates: Predicate[()]) -> Predicate[()]:
 
 
 def monomorphize[*Args](predicate: Predicate[*Args], *args: *Args) -> Predicate[()]:
-    def inner(symbol: Alt) -> bool:
+    def inner(symbol: Expansion) -> bool:
         return predicate(symbol, *args)
 
     return inner
