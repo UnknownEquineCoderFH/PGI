@@ -17,6 +17,7 @@ from .predicate import Predicate
 class Grammar:
     rules: dict[NonTerminal, Expression]
     allow_recursive: bool = False
+    recursion_limit: int = 5
     predicates: dict[NonTerminal, Predicate[()]] = Factory(dict)
 
     def __attrs_post_init__(self) -> None:
@@ -26,9 +27,7 @@ class Grammar:
             }
 
             if recursive:
-                raise ValueError(
-                    f"Some recursive rules were detected {recursive}"
-                ) from None
+                raise ValueError(f"Some recursive rules were detected {recursive}") from None
 
     def export(self, file: str) -> None:
         with open(file, "w") as f:
@@ -47,9 +46,7 @@ class Grammar:
 
         return self
 
-    def add_predicate[
-        *Args
-    ](self, symbol: NonTerminal, predicate: Predicate[*Args], *args: *Args):
+    def add_predicate[*Args](self, symbol: NonTerminal, predicate: Predicate[*Args], *args: *Args):
         if (fn := self.predicates.get(symbol)) is None:
             self.predicates[symbol] = monomorphize(predicate, *args)
         else:
@@ -84,16 +81,12 @@ class Grammar:
 
         return sum(n_alts)
 
-    def expand_one(
-        self, symbol: NonTerminal = NonTerminal("<start>"), /
-    ) -> tuple[Expansion, ...]:
+    def expand_one(self, symbol: NonTerminal = NonTerminal("<start>"), /) -> tuple[Expansion, ...]:
         partial = (rule.expand_one(self) for rule in self.rules[symbol].expansions)
 
         return tuple(item for sublist in partial for item in sublist)
 
-    def expand_one_from_alts(
-        self, alts: Sequence[Expansion], /
-    ) -> tuple[Expansion, ...]:
+    def expand_one_from_alts(self, alts: Sequence[Expansion], /) -> tuple[Expansion, ...]:
         partial = (alt.expand_one(self) for alt in alts)
 
         return tuple(item for sublist in partial for item in sublist)
@@ -101,9 +94,7 @@ class Grammar:
     def _rules_can_expand(self, alts: Sequence[Expansion], /) -> bool:
         return all(rule.can_expand() for rule in alts)
 
-    def expand(
-        self, symbol: NonTerminal = NonTerminal("<start>"), /
-    ) -> Iterator[Expansion]:
+    def expand(self, symbol: NonTerminal = NonTerminal("<start>"), /) -> Iterator[Expansion]:
         alts = self.expand_one(symbol)
 
         while self._rules_can_expand(alts):
@@ -136,9 +127,7 @@ class Grammar:
         for symbol, _ in occurrences:
             yield symbol
 
-    def partial_expand(
-        self, symbol: NonTerminal | str = NonTerminal("<start>"), /
-    ) -> Self:
+    def partial_expand(self, symbol: NonTerminal | str = NonTerminal("<start>"), /) -> Self:
         if isinstance(symbol, str):
             symbol = NonTerminal.symbol(symbol)
 
@@ -160,9 +149,7 @@ class Grammar:
             for alt in val:
                 components = break_sequence(alt)
 
-                transformed = [
-                    NonTerminal(c) if is_symbol(c) else Terminal(c) for c in components
-                ]
+                transformed = [NonTerminal(c) if is_symbol(c) else Terminal(c) for c in components]
 
                 alts.append(Expansion(transformed))
 

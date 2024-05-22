@@ -35,9 +35,7 @@ def dot_escape(s: str, show_ascii=None) -> str:
     return escaped_s
 
 
-def extract_node(
-    node: DerivationTree, id: int
-) -> tuple[str, list[DerivationTree], str]:
+def extract_node(node: DerivationTree, id: int) -> tuple[str, list[DerivationTree], str]:
     symbol, children, *annotation = node
     return symbol, children, "".join(str(a) for a in annotation)  # type: ignore
 
@@ -96,6 +94,19 @@ XML_GRAMMAR: Grammar = {
     "<text>": ["<letter><text>", "<letter>"],
     "<letter>": crange("a", "z"),
 }
+
+"""
+<start> ::= <xml-tree>
+<xml-tree> ::= <open-tag><xml-content><close-tag>
+<open-tag> ::= <<id>>
+<close-tag> ::= </<id>>
+<xml-content> ::= <text> | <xml-tree>
+<id> ::= <letter><id> | <letter>
+<text> ::= <letter><text> | <letter>
+<letter> ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
+
+
+"""
 
 solver = ISLaSolver(
     XML_GRAMMAR,

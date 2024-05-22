@@ -7,9 +7,7 @@ from pig.grammar import Grammar
 grammar = load_bnf("grammars/numbers.bnf")
 
 parsed = (
-    Grammar.from_isla(grammar)
-    .load_constraints("grammars/constraints.pig")
-    .partial_expand("start")
+    Grammar.from_isla(grammar).load_constraints("grammars/constraints.pig").partial_expand("start")
 )
 
 print(parsed)

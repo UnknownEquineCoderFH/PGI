@@ -24,4 +24,4 @@ class Terminal:
         if not isinstance(other, Terminal):
             return NotImplemented
 
-        return Terminal(f"{self.internal}{other.internal}")
+        return type(self)(f"{self.internal}{other.internal}")

@@ -6,7 +6,7 @@ from isla.language import Grammar as ISLaGrammar, parse_bnf
 
 if TYPE_CHECKING:
     from .predicate import Predicate
-    from .alt import Expansion
+    from .expansion import Expansion
 
 
 def load_bnf(path: str) -> ISLaGrammar:
@@ -46,7 +46,7 @@ def chain(first: Predicate[()], *predicates: Predicate[()]) -> Predicate[()]:
     Returns a new predicate that combines multiple predicates into a single predicate.
 
     Args:
-        *predicates: A variable number of predicates to be combined.
+        predicates: A variable number of predicates to be combined.
 
     Returns:
         A new predicate that returns True if all of the given
@@ -67,6 +67,15 @@ def chain(first: Predicate[()], *predicates: Predicate[()]) -> Predicate[()]:
 
 
 def monomorphize[*Args](predicate: Predicate[*Args], *args: *Args) -> Predicate[()]:
+    """
+    Returns a new predicate that takes no extra arguments.
+
+    Args:
+        predicate: A predicate that takes arguments.
+        args: The arguments to be passed to the predicate.
+
+    """
+
     def inner(symbol: Expansion) -> bool:
         return predicate(symbol, *args)
 
